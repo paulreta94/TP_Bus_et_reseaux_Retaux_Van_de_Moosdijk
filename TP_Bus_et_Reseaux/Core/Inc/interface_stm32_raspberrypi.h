@@ -27,6 +27,6 @@ void interface_stm32_raspberrypi(void);
 
 
 extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart4;
+extern UART_HandleTypeDef huart1;
 
 #endif /* INC_INTERFACE_STM32_RASPBERRYPI_H_ */

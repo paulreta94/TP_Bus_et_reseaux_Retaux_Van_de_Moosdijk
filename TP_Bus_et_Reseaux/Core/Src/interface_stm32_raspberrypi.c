@@ -5,6 +5,7 @@
  *      Author: peret
  */
 
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,8 @@ void interface_stm32_raspberrypi(void) {
 
 	if (uartRxReceived) {
 		printf("Com OK\r\n");
-		/*switch (uartRxBuffer[4]) {
+		HAL_Delay(1000);
+		switch (uartRxBuffer[4]) {
 		case ASCII_A_CHARACTER:
 			printf("test OK");
 			//BMP280_get_angle();
@@ -46,11 +48,11 @@ void interface_stm32_raspberrypi(void) {
 			break;
 		default:
 			printf("Command not found");
-		}*/
+		}
 		uartRxReceived = 0;
 	}
 }
-/*void Shell_Init(void) {
+void Shell_Init(void) {
  memset(argv, (int) NULL, MAX_ARGS * sizeof(char*));
  memset(cmdBuffer, 0, CMD_BUFFER_SIZE * sizeof(char));
  memset(uartRxBuffer, 0, UART_RX_BUFFER_SIZE * sizeof(char));
@@ -102,9 +104,7 @@ void interface_stm32_raspberrypi(void) {
  HAL_UART_Transmit(&huart2, prompt, sizeof(prompt), HAL_MAX_DELAY);
  newCmdReady = 0;
  }
- }*/
+ }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	uartRxReceived = 1;
-	HAL_UART_Receive_IT(&huart4, uartRxBuffer, UART_RX_BUFFER_SIZE);
-}
+
+*/

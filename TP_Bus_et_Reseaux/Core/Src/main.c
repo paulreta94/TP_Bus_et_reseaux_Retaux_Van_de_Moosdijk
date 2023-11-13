@@ -45,11 +45,12 @@ CAN_HandleTypeDef hcan1;
 
 I2C_HandleTypeDef hi2c1;
 
-UART_HandleTypeDef huart4;
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t uartRxReceived = 0;
+uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,8 +58,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_UART4_Init(void);
 static void MX_CAN1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -90,6 +91,11 @@ CAN_TxHeaderTypeDef reset = { .StdId = 0x62, .ExtId = 0x0, .IDE = CAN_ID_STD,
 uint8_t *reset_frame = NULL;
 uint32_t test_mail_box;
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+
+			HAL_UART_Receive_IT(&huart1, uartRxBuffer, UART_RX_BUFFER_SIZE);
+		printf("Com OK\r\n");
+	}
 /* USER CODE END 0 */
 
 /**
@@ -126,12 +132,15 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
-  MX_UART4_Init();
   MX_CAN1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	//Shell_Init();
   if (HAL_CAN_Start(&hcan1) != HAL_OK)
 	Error_Handler();
+  HAL_UART_Receive_IT(&huart1, uartRxBuffer, UART_RX_BUFFER_SIZE);
+  //if (HAL_UART_Receive_IT(&huart1, uint8_t *pData, uint16_t Size))
+  printf("Initialisation terminée\r\n");
   //BMP280_check();
   //BMP280_init();
   /* USER CODE END 2 */
@@ -141,9 +150,9 @@ int main(void)
 	while (1) {
 		/*BMP280_S32_t temperature = bmp280_compensate_T_int32();
 		printf("Temperature : %ld\r\n",temperature);*/
-		HAL_Delay(1000);
+		//HAL_Delay(1000);
 
-		interface_stm32_raspberrypi();
+		//interface_stm32_raspberrypi();
 		/*if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
 				test_frame_forward, &test_mail_box) != HAL_OK)
 			Error_Handler();
@@ -152,6 +161,10 @@ int main(void)
 				test_frame_reverse, &test_mail_box) != HAL_OK)
 			Error_Handler();
 		HAL_Delay(2000);*/
+//		if(uartRxReceived) {
+//			printf("Com OK\r\n");
+//			uartRxReceived = 0;
+//		}
 	}
     /* USER CODE END WHILE */
 
@@ -280,35 +293,35 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief UART4 Initialization Function
+  * @brief USART1 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_UART4_Init(void)
+static void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN UART4_Init 0 */
+  /* USER CODE BEGIN USART1_Init 0 */
 
-  /* USER CODE END UART4_Init 0 */
+  /* USER CODE END USART1_Init 0 */
 
-  /* USER CODE BEGIN UART4_Init 1 */
+  /* USER CODE BEGIN USART1_Init 1 */
 
-  /* USER CODE END UART4_Init 1 */
-  huart4.Instance = UART4;
-  huart4.Init.BaudRate = 115200;
-  huart4.Init.WordLength = UART_WORDLENGTH_8B;
-  huart4.Init.StopBits = UART_STOPBITS_1;
-  huart4.Init.Parity = UART_PARITY_NONE;
-  huart4.Init.Mode = UART_MODE_TX_RX;
-  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart4) != HAL_OK)
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN UART4_Init 2 */
+  /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END UART4_Init 2 */
+  /* USER CODE END USART1_Init 2 */
 
 }
 
