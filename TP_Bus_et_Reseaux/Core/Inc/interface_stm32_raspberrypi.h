@@ -23,8 +23,8 @@
 #define ASCII_S_CHARACTER 0x83
 #define ASCII_T_CHARACTER 0x84
 
-/*void Shell_Init(void);
-void Shell_Loop(void);*/
+void interface_stm32_raspberrypi(void);
+
 
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart4;

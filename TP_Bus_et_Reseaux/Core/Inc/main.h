@@ -33,7 +33,6 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "BMP280_simple.h"
 #include "interface_stm32_raspberrypi.h"
-#include "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_can.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -75,7 +74,8 @@ void Error_Handler(void);
 #define SWO_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define MAX_FRAME_SIZE 4
+#define MAILBOX_SIZE 10
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

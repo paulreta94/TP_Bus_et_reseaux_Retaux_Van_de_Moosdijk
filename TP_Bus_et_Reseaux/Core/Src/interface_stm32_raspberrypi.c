@@ -12,27 +12,30 @@
 #include "stm32f4xx_hal_uart.h"
 
 uint8_t uartRxReceived;
-uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
-char cast[UART_RX_BUFFER_SIZE];
+uint8_t uartRxBuffer[1];
+char factor_K_buffer[1];
 
 char *factor_K;
 
 void interface_stm32_raspberrypi(void) {
+
 	if (uartRxReceived) {
-		switch (uartRxBuffer[4]) {
+		printf("Com OK\r\n");
+		/*switch (uartRxBuffer[4]) {
 		case ASCII_A_CHARACTER:
 			printf("test OK");
 			//BMP280_get_angle();
-		/*case ASCII_K_CHARACTER:
-			if (strlen(cast) > 4) {
-				factor_K = strtok(cast, "=");
+		case ASCII_K_CHARACTER:
+			printf("test OK");
+			/*factor_K_buffer[0] = uartRxBuffer[0];
+			if (strlen(factor_K_buffer) > 4) {
+				factor_K = strtok(factor_K_buffer, "=");
 				//BMP280_set_factor_K(factor_K);
-				printf("test OK");
 			}
 			else{
 				printf("test OK");
 			//BMP280_get_factor_K();
-				}*/
+				}
 		case ASCII_P_CHARACTER:
 			printf("test OK");
 			//BMP280_get_pressure();
@@ -43,7 +46,7 @@ void interface_stm32_raspberrypi(void) {
 			break;
 		default:
 			printf("Command not found");
-		}
+		}*/
 		uartRxReceived = 0;
 	}
 }

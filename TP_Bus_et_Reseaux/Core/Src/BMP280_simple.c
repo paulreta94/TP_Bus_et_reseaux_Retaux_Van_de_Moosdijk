@@ -142,7 +142,7 @@ BMP280_S32_t BMP280_get_temperature() {
 
 	free(buf);
 
-	printf("Temperature: ");
+	printf("Non compensated temperature: ");
 	printf("0X%05lX", adc_T);
 	printf("\r\n");
 

@@ -65,7 +65,7 @@ static void MX_CAN1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint16_t BMP280_address = 0x77<<1;
+uint16_t BMP280_address = 0x77 << 1;
 uint8_t request_buffer[REGISTER_ADDRESS_SIZE];
 uint8_t configuration_buffer[2];
 uint8_t calibration_buffer[1];
@@ -75,7 +75,20 @@ uint8_t temperature_buffer[3];
 uint8_t pressure_buffer[3];
 uint16_t size = 1;
 uint32_t timeout = 100;
-CAN_TxHeaderTypeDef automatic_mode_test{ .StdId = 0x61, .ExtId = ;
+CAN_TxHeaderTypeDef automatic_mode_test = {
+		.StdId = 0x61,
+		.ExtId = 0x0,
+		.IDE = CAN_ID_STD,
+		.RTR = CAN_RTR_DATA,
+		.DLC = 0x2,
+		.TransmitGlobalTime = DISABLE
+	};
+uint8_t test_frame_forward[MAX_FRAME_SIZE];
+uint8_t test_frame_reverse[MAX_FRAME_SIZE];
+CAN_TxHeaderTypeDef reset = { .StdId = 0x62, .ExtId = 0x0, .IDE = CAN_ID_STD,
+		.RTR = CAN_RTR_DATA, .DLC = 0x0, .TransmitGlobalTime = DISABLE };
+uint8_t *reset_frame = NULL;
+uint32_t test_mail_box;
 
 /* USER CODE END 0 */
 
@@ -86,6 +99,10 @@ CAN_TxHeaderTypeDef automatic_mode_test{ .StdId = 0x61, .ExtId = ;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	test_frame_forward[0] = 0x54;
+	test_frame_forward[1] = 0x00;
+	test_frame_reverse[0] = 0x54;
+	test_frame_reverse[1] = 0x01;
 
   /* USER CODE END 1 */
 
@@ -95,8 +112,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  if(HAL_CAN_Start(&hcan1)!=HAL_OK)
-	  Error_Handler();
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -114,68 +130,33 @@ int main(void)
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
 	//Shell_Init();
+  if (HAL_CAN_Start(&hcan1) != HAL_OK)
+	Error_Handler();
+  //BMP280_check();
+  //BMP280_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1)
-	{
-		//HAL_Delay(1000);
-		/*BMP 280 identification */
-		/*identification_buffer[0]=0xD0;
-	  	  if(HAL_I2C_Master_Transmit(&hi2c1,BMP280_address,identification_buffer,size,timeout)==HAL_OK){
-	  		  printf("Transmission ok\r\n");
-	  	  }
-	  	  HAL_Delay(10);
-	  	  HAL_I2C_Master_Receive(&hi2c1,BMP280_address,identification_buffer,size,timeout);
-	  	  printf("%x\r\n",identification_buffer[0]);*/
-		/*BMP 280 configuration*/
-		/*configuration_buffer[0]=0xF4;
-	  	  configuration_buffer[1]=0x57; // 01010111 : temperature oversampling x2, pressure oversampling x16 and normal mode
-	  	  if(HAL_I2C_Master_Transmit(&hi2c1,BMP280_address,configuration_buffer,2,timeout)==HAL_OK){
-	  	  printf("Transmission ok\r\n");
-	  	  }
-	  	  HAL_I2C_Master_Receive(&hi2c1,BMP280_address,answer_buffer,1,timeout);
-	  	  printf("%x\r\n",answer_buffer[0]);*/
-		/*BMP 280 calibration retrieval*/
-		/*calibration_buffer[0]=0x88;
-	  		if(HAL_I2C_Master_Transmit(&hi2c1,BMP280_address,calibration_buffer,1,timeout)==HAL_OK){
-	  			printf("Transmission ok\r\n");
-	  		}
-	  		HAL_I2C_Master_Receive(&hi2c1,BMP280_address,answer_calibration_buffer,26,timeout);
-	  		for (int i=0;i<=25;i++){
-	  			printf("Calibration byte #%d : %x\r\n",i,answer_calibration_buffer[i]);
-	  		}*/
+	while (1) {
+		/*BMP280_S32_t temperature = bmp280_compensate_T_int32();
+		printf("Temperature : %ld\r\n",temperature);*/
+		HAL_Delay(1000);
 
-		// Temperature
-		/*request_buffer[0] = 0xFA;
-		if(HAL_I2C_Master_Transmit(&hi2c1,BMP280_address,request_buffer,1,timeout)==HAL_OK){
-			printf("Transmission ok\r\n");
-		}
-		HAL_I2C_Master_Receive(&hi2c1,BMP280_address,answer_calibration_buffer,3,timeout);
-		for (int i=0;i<=2;i++){
-			printf("Non compensated temperature byte #%d : %x\r\n",i,answer_calibration_buffer[i]);
-		}
-
-		// Pressure
-		request_buffer[0] = 0xF7;
-		if(HAL_I2C_Master_Transmit(&hi2c1,BMP280_address,request_buffer,1,timeout)==HAL_OK){
-			printf("Transmission ok\r\n");
-		}
-		HAL_I2C_Master_Receive(&hi2c1,BMP280_address,answer_calibration_buffer,3,timeout);
-		for (int i=0;i<=2;i++){
-			printf("Non compensated pressure byte #%d : %x\r\n",i,answer_calibration_buffer[i]);
-		}
-		HAL_Delay(1000);*/
-
-		//interface_stm32_raspberrypi();
-
-		if(HAL_CAN_AddTxMessage(&hcan1,))
+		interface_stm32_raspberrypi();
+		/*if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
+				test_frame_forward, &test_mail_box) != HAL_OK)
+			Error_Handler();
+		HAL_Delay(2000);
+		if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
+				test_frame_reverse, &test_mail_box) != HAL_OK)
+			Error_Handler();
+		HAL_Delay(2000);*/
+	}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	/*Non compensated temperature and pressure retrieval*/
-
 
   /* USER CODE END 3 */
 }
@@ -202,9 +183,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 16;
-  RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 80;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -243,11 +224,11 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 12;
+  hcan1.Init.Prescaler = 16;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_5TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_2TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
@@ -414,8 +395,7 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
-	while (1)
-	{
+	while (1) {
 	}
   /* USER CODE END Error_Handler_Debug */
 }
