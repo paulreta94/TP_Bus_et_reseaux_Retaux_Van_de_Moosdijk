@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define UART_RX_BUFFER_SIZE 12
-#define UART_TX_BUFFER_SIZE 64
+#define SHORT_UART_RX_BUFFER_SIZE 5
+#define LONG_UART_RX_BUFFER_SIZE 10
 #define CMD_BUFFER_SIZE 64
 #define MAX_ARGS 1
 #define ASCII_A_CHARACTER 0x65

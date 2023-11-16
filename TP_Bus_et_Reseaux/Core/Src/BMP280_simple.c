@@ -26,6 +26,8 @@ int16_t dig_P8;
 int16_t dig_P9;
 
 BMP280_S32_t t_fine;
+uint32_t final_P;
+float final_T;
 
 int BMP280_check() {
 	uint8_t buf[1];
@@ -56,18 +58,18 @@ int BMP280_check() {
 int BMP280_get_trimming() {
 	uint8_t *buf;
 	buf = BMP280_Read_Reg(BMP280_TRIM_REG_MSB, BMP280_TRIM_LEN);
-	dig_T1 = (buf[0] | buf[1]);
-	dig_T2 = (buf[2] | buf[3]);
-	dig_T3 = (buf[4] | buf[5]);
-	dig_P1 = (buf[6] | buf[7]);
-	dig_P2 = (buf[8] | buf[9]);
-	dig_P3 = (buf[10] | buf[11]);
-	dig_P4 = (buf[12] | buf[13]);
-	dig_P5 = (buf[14] | buf[15]);
-	dig_P6 = (buf[16] | buf[17]);
-	dig_P7 = (buf[18] | buf[19]);
-	dig_P8 = (buf[20] | buf[21]);
-	dig_P9 = (buf[22] | buf[23]);
+	dig_T1 = (buf[0] + buf[1]<<8);
+	dig_T2 = (buf[2] + buf[3]<<8);
+	dig_T3 = (buf[4] + buf[5]<<8);
+	dig_P1 = (buf[6] + buf[7]<<8);
+	dig_P2 = (buf[8] + buf[9]<<8);
+	dig_P3 = (buf[10] + buf[11]<<8);
+	dig_P4 = (buf[12] + buf[13]<<8);
+	dig_P5 = (buf[14] + buf[15]<<8);
+	dig_P6 = (buf[16] + buf[17]<<8);
+	dig_P7 = (buf[18] + buf[19]<<8);
+	dig_P8 = (buf[20] + buf[21]<<8);
+	dig_P9 = (buf[22] + buf[23]<<8);
 	free(buf);
 	return 0;
 }
@@ -142,9 +144,9 @@ BMP280_S32_t BMP280_get_temperature() {
 
 	free(buf);
 
-	printf("Non compensated temperature: ");
-	printf("0X%05lX", adc_T);
-	printf("\r\n");
+//	printf("Non compensated temperature: ");
+//	printf("0X%05lX", adc_T);
+//	printf("\r\n");
 
 	return adc_T;
 }
@@ -160,14 +162,14 @@ BMP280_S32_t BMP280_get_pressure() {
 
 	free(buf);
 
-	printf("Pressure:    0x");
-	printf("%05lX", adc_P);
-	printf("\r\n");
+//	printf("Pressure:    0x");
+//	printf("%05lX", adc_P);
+//	printf("\r\n");
 
 	return adc_P;
 }
 
-BMP280_S32_t bmp280_compensate_T_int32() {
+float bmp280_compensate_T_int32() {
 	BMP280_S32_t adc_T = BMP280_get_temperature();
 	BMP280_S32_t var1, var2, T;
 	var1 = ((((adc_T >> 3) - ((BMP280_S32_t) dig_T1 << 1)))
@@ -177,12 +179,14 @@ BMP280_S32_t bmp280_compensate_T_int32() {
 			* ((BMP280_S32_t) dig_T3)) >> 14;
 	t_fine = var1 + var2;
 	T = (t_fine * 5 + 128) >> 8;
-	return T;
+	final_T = 0.01*T;
+	printf("T=+%.2f_C\r\n",final_T);
+	return final_T;
 }
 
 // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
 // Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
-BMP280_U32_t bmp280_compensate_P_int64() {
+uint32_t bmp280_compensate_P_int64() {
 	BMP280_S32_t adc_P = BMP280_get_pressure();
 	BMP280_S64_t var1, var2, p;
 	var1 = ((BMP280_S64_t) t_fine) - 128000;
@@ -201,5 +205,7 @@ BMP280_U32_t bmp280_compensate_P_int64() {
 	var1 = (((BMP280_S64_t) dig_P9) * (p >> 13) * (p >> 13)) >> 25;
 	var2 = (((BMP280_S64_t) dig_P8) * p) >> 19;
 	p = ((p + var1 + var2) >> 8) + (((BMP280_S64_t) dig_P7) << 4);
-	return (BMP280_U32_t) p;
+	final_P = (uint32_t) p/256;
+	printf("P=%ldPa\r\n",final_P);
+	return final_P;
 }

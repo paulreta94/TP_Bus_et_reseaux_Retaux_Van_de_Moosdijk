@@ -1,0 +1,2 @@
+../Core/Src/interface_stm32_raspberrypi.c:24:6:interface_stm32_raspberrypi	8	static
+../Core/Src/interface_stm32_raspberrypi.c:75:6:HAL_UART_RxCpltCallback	16	static

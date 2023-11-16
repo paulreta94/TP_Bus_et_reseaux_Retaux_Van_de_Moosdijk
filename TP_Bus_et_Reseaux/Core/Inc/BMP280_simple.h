@@ -40,7 +40,7 @@ BMP280_S32_t BMP280_get_temperature();
 BMP280_S32_t BMP280_get_pressure();
 uint8_t* BMP280_Read_Reg(uint8_t reg, uint8_t value);
 int BMP280_Write_Reg(uint8_t reg, uint8_t value);
-BMP280_S32_t bmp280_compensate_T_int32();
-BMP280_U32_t bmp280_compensate_P_int64();
+float bmp280_compensate_T_int32();
+uint32_t bmp280_compensate_P_int64();
 
 #endif /* SRC_BMP280_H_ */

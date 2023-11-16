@@ -21,8 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,8 +50,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t uartRxReceived = 0;
-uint8_t uartRxBuffer[UART_RX_BUFFER_SIZE];
+extern uint8_t uartRxReceived;
+extern uint8_t short_uartRxBuffer[SHORT_UART_RX_BUFFER_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,12 +61,17 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_USART1_UART_Init(void);
+
+extern float final_T;
+extern uint32_t final_P;
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//memset(uartRxBuffer, 0, UART_RX_BUFFER_SIZE * sizeof(char));
+
 uint16_t BMP280_address = 0x77 << 1;
 uint8_t request_buffer[REGISTER_ADDRESS_SIZE];
 uint8_t configuration_buffer[2];
@@ -74,8 +80,10 @@ uint8_t answer_calibration_buffer[26];
 uint8_t answer_configuration_buffer[1];
 uint8_t temperature_buffer[3];
 uint8_t pressure_buffer[3];
+
 uint16_t size = 1;
 uint32_t timeout = 100;
+
 CAN_TxHeaderTypeDef automatic_mode_test = {
 		.StdId = 0x61,
 		.ExtId = 0x0,
@@ -90,12 +98,8 @@ CAN_TxHeaderTypeDef reset = { .StdId = 0x62, .ExtId = 0x0, .IDE = CAN_ID_STD,
 		.RTR = CAN_RTR_DATA, .DLC = 0x0, .TransmitGlobalTime = DISABLE };
 uint8_t *reset_frame = NULL;
 uint32_t test_mail_box;
+uint8_t angle = 90;
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-
-			HAL_UART_Receive_IT(&huart1, uartRxBuffer, UART_RX_BUFFER_SIZE);
-		printf("Com OK\r\n");
-	}
 /* USER CODE END 0 */
 
 /**
@@ -138,33 +142,27 @@ int main(void)
 	//Shell_Init();
   if (HAL_CAN_Start(&hcan1) != HAL_OK)
 	Error_Handler();
-  HAL_UART_Receive_IT(&huart1, uartRxBuffer, UART_RX_BUFFER_SIZE);
-  //if (HAL_UART_Receive_IT(&huart1, uint8_t *pData, uint16_t Size))
-  printf("Initialisation terminée\r\n");
-  //BMP280_check();
-  //BMP280_init();
+  HAL_UART_Receive_IT(&huart1, short_uartRxBuffer, SHORT_UART_RX_BUFFER_SIZE);
+  //HAL_UART_Receive_IT(&huart1, long_uartRxBuffer, LONG_UART_RX_BUFFER_SIZE);
+  BMP280_check();
+  BMP280_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		/*BMP280_S32_t temperature = bmp280_compensate_T_int32();
-		printf("Temperature : %ld\r\n",temperature);*/
-		//HAL_Delay(1000);
-
-		//interface_stm32_raspberrypi();
-		/*if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
+		/*if(final_T > 25) {
+			if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
 				test_frame_forward, &test_mail_box) != HAL_OK)
-			Error_Handler();
+			Error_Handler();}
 		HAL_Delay(2000);
-		if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
+		else {
+			if (HAL_CAN_AddTxMessage(&hcan1, &automatic_mode_test,
 				test_frame_reverse, &test_mail_box) != HAL_OK)
-			Error_Handler();
+				Error_Handler();
 		HAL_Delay(2000);*/
-//		if(uartRxReceived) {
-//			printf("Com OK\r\n");
-//			uartRxReceived = 0;
-//		}
+		interface_stm32_raspberrypi();
+
 	}
     /* USER CODE END WHILE */
 

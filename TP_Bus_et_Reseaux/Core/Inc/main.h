@@ -77,7 +77,6 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define MAX_FRAME_SIZE 4
 #define MAILBOX_SIZE 10
-#define UART_RX_BUFFER_SIZE 1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
