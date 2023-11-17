@@ -29,6 +29,9 @@ BMP280_S32_t t_fine;
 uint32_t final_P;
 float final_T;
 
+/*This function enables to check whether we can communicate well with the sensor
+ * as well as whether we can retrieve its address.
+ */
 int BMP280_check() {
 	uint8_t buf[1];
 	HAL_StatusTypeDef ret;
@@ -55,25 +58,32 @@ int BMP280_check() {
 	}
 }
 
+/* This function enables to retrieve the trimming registers, which will help use to compensate the pressure and the pressure.
+ * (Please see functions bmp280_compensate_P_int64() and bmp280_compensate_T_int32()).
+ */
+
 int BMP280_get_trimming() {
 	uint8_t *buf;
 	buf = BMP280_Read_Reg(BMP280_TRIM_REG_MSB, BMP280_TRIM_LEN);
-	dig_T1 = (buf[0] + buf[1]<<8);
-	dig_T2 = (buf[2] + buf[3]<<8);
-	dig_T3 = (buf[4] + buf[5]<<8);
-	dig_P1 = (buf[6] + buf[7]<<8);
-	dig_P2 = (buf[8] + buf[9]<<8);
-	dig_P3 = (buf[10] + buf[11]<<8);
-	dig_P4 = (buf[12] + buf[13]<<8);
-	dig_P5 = (buf[14] + buf[15]<<8);
-	dig_P6 = (buf[16] + buf[17]<<8);
-	dig_P7 = (buf[18] + buf[19]<<8);
-	dig_P8 = (buf[20] + buf[21]<<8);
-	dig_P9 = (buf[22] + buf[23]<<8);
+	dig_T1 = (buf[0] | buf[1]<<8);
+	dig_T2 = (buf[2] | buf[3]<<8);
+	dig_T3 = (buf[4] | buf[5]<<8);
+	dig_P1 = (buf[6] | buf[7]<<8);
+	dig_P2 = (buf[8] | buf[9]<<8);
+	dig_P3 = (buf[10] | buf[11]<<8);
+	dig_P4 = (buf[12] | buf[13]<<8);
+	dig_P5 = (buf[14] | buf[15]<<8);
+	dig_P6 = (buf[16] | buf[17]<<8);
+	dig_P7 = (buf[18] | buf[19]<<8);
+	dig_P8 = (buf[20] | buf[21]<<8);
+	dig_P9 = (buf[22] | buf[23]<<8);
 	free(buf);
 	return 0;
 }
 
+/* This function enables to set temperature resolution at 17 bit/0.0025 °C, pressure resolution
+ * at 20 bit/0.16 Pa and to set the power mode to normal
+ */
 int BMP280_init() {
 	HAL_StatusTypeDef ret;
 	uint8_t ctrl = (0b010 << 5) | (0b101 << 2) | (0b11);
@@ -90,6 +100,9 @@ int BMP280_init() {
 	BMP280_get_trimming();
 	return 0;
 }
+
+/* This function is a general one used to modify a register of the BMP280 memory.
+ */
 
 int BMP280_Write_Reg(uint8_t reg, uint8_t value) {
 	uint8_t buf[3];
@@ -133,6 +146,9 @@ uint8_t* BMP280_Read_Reg(uint8_t reg, uint8_t length) {
 	return buf;
 }
 
+/* This function enables to retrieve the non compensated temperature.
+ */
+
 BMP280_S32_t BMP280_get_temperature() {
 	uint8_t *buf;
 	BMP280_S32_t adc_T;
@@ -150,6 +166,8 @@ BMP280_S32_t BMP280_get_temperature() {
 
 	return adc_T;
 }
+/* This function enables to retrieve the non compensated pressure.
+ */
 
 BMP280_S32_t BMP280_get_pressure() {
 	uint8_t *buf;
@@ -169,6 +187,7 @@ BMP280_S32_t BMP280_get_pressure() {
 	return adc_P;
 }
 
+// This function returns temperature with 0.01 deg_C resolution.
 float bmp280_compensate_T_int32() {
 	BMP280_S32_t adc_T = BMP280_get_temperature();
 	BMP280_S32_t var1, var2, T;
@@ -184,8 +203,7 @@ float bmp280_compensate_T_int32() {
 	return final_T;
 }
 
-// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
-// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
+// This function returns pressure in Pa as unsigned 32 bit integer.
 uint32_t bmp280_compensate_P_int64() {
 	BMP280_S32_t adc_P = BMP280_get_pressure();
 	BMP280_S64_t var1, var2, p;

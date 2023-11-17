@@ -13,18 +13,8 @@
 #include <stdio.h>
 
 #define SHORT_UART_RX_BUFFER_SIZE 5
-#define LONG_UART_RX_BUFFER_SIZE 10
-#define CMD_BUFFER_SIZE 64
-#define MAX_ARGS 1
-#define ASCII_A_CHARACTER 0x65
-#define ASCII_G_CHARACTER 0x71
-#define ASCII_K_CHARACTER 0x4B
-#define ASCII_P_CHARACTER 0x80
-#define ASCII_S_CHARACTER 0x83
-#define ASCII_T_CHARACTER 0x84
 
 void interface_stm32_raspberrypi(void);
-
 
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart1;
